@@ -1,15 +1,7 @@
-#cathodeOCV,anodeOCV,cathodeOP,andodeOP,ohmicOP
-
-function fitQuadratics(cathodeOCV,anodeOCV,cathodeOP,anodeOP,ohmicOP)
-
-
-end
-
 #Convenient function to fit a quadratic: xTQx + qTx
 function fitQuadraticPSD(data::Array,y_true::Array)
     #Num Points, Num Features = size(data)
     np,nf = size(data)
-    onemat = Diagonal(ones(np))
     #Create Model
     model = JuMP.Model(Mosek.Optimizer)
     #Create Quadratic variable
@@ -22,14 +14,13 @@ function fitQuadraticPSD(data::Array,y_true::Array)
         JuMP.@constraint(model,e[i]==data[i,:]'*Q*data[i,:]+data[i,:]'*q-y_true[i])
     end
     #Minimize Error
-    JuMP.@objective(model,Min,e'*onemat*e)
+    JuMP.@objective(model,Min,e'*e)
     return model
 end
 
 function fitQuadraticNSD(data::Array,y_true::Array)
     #Num Points, Num Features = size(data)
     np,nf = size(data)
-    onemat = Diagonal(ones(np))
     #Create Model
     model = JuMP.Model(Mosek.Optimizer)
     #Create Quadratic variable
@@ -42,6 +33,6 @@ function fitQuadraticNSD(data::Array,y_true::Array)
         JuMP.@constraint(model,e[i]==data[i,:]'*Q*data[i,:]+data[i,:]'*q-y_true[i])
     end
     #Minimize Error
-    JuMP.@objective(model,Min,e'*onemat*e)
+    JuMP.@objective(model,Min,e'*e)
     return model
 end
