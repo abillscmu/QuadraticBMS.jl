@@ -1,10 +1,11 @@
-function generateDFNData(cell,iapp::Array,N)
+function generateDFNData(cell,iapp::Array,N;R=0.01)
     # Generate Dfn Data using the cell defined by pybamm
     #First, want to get the OCV Curves
     x = collect(range(0,stop=1,length=N))
     #Convert the OCP to Julia readable
     cellDict = py"dict($cell)"
     nocv = cellDict["Negative electrode OCP [V]"]
+    println(nocv(0.2))
     pocv = cellDict["Positive electrode OCP [V]"]
     #TODO: Deal with array OCV's
     @assert length(pocv)==2 "POCV must be a tuple of length 2"
@@ -34,6 +35,7 @@ function generateDFNData(cell,iapp::Array,N)
     #Get Value of Exchange Current Density
     cathodeOP =  similar(cathodeOCV)
     anodeOP = similar(anodeOCV)
+    OOP = similar(anodeOP)
 
     n,m=size(cathodeOCV)
     cathode_css = pocv_x.*cellDict["Maximum concentration in positive electrode [mol.m-3]"]
@@ -50,8 +52,13 @@ function generateDFNData(cell,iapp::Array,N)
         I_ = iapp[j]
         cathodeOP[i,j]=(1/aFRT_pos).*asinh(I_./(2*i_0p));
         anodeOP[i,j]=(1/aFRT_neg).*asinh(I_./(2*i_0n));
+        OOP[i,j] = I_.*R
     end;end
-    return cathodeOCV,anodeOCV,cathodeOP,anodeOP,nocv_x,pocv_x
+
+   
+
+
+    return cathodeOCV,anodeOCV,cathodeOP,anodeOP,OOP,nocv_x,pocv_x
     
     
 end
