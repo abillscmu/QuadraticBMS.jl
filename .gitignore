@@ -1,2 +1,4 @@
+*.csv
+.vscode
 Manifest.toml
 test/Manifest.toml

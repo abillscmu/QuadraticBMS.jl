@@ -9,9 +9,14 @@ pandas = pyimport("pandas")
 iapp = collect(range(-30,stop=0,length=100))
 
 #dfn data generation
-param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Chen2020)
+param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Ramadass2004)
+
+
+
 cellDict = py"dict($param)"
+println("Generating Data...")
 cathodeOCV,anodeOCV,cathodeOP,anodeOP,OOP = QuadraticBMS.generateDFNData(cellDict,iapp,25)
+println("Data Generation Complete!")
 n,m = size(cathodeOCV)
 soc = collect(range(0,stop=1,length=n))
 reverse!(cathodeOCV,dims=1)
@@ -215,10 +220,26 @@ DT_val = get_val(:DT,controller_t)
 t_val = cumsum(DT_val)
 t_val = t_val.-t_val[1]
 
-using DataFrames
-using CSV 
+# Create interpolation function
+function current_function(t,t_val,I)
+    println(t)
+    t_num = t.value*11346.612775644178
+    ind = findfirst(t_val->t_val>=t_num,t_val)
+    return I[ind]
+end
 
-df = DataFrame("# time [s]"=>t_val,"current [A]"=>I)
-CSV.write("optimal_input.csv",df)
+current_function_specific(t) = current_function(t,t_val,I)
 
+timescale=param.evaluate(model.timescale)
+current_interpolant = pybamm.Interpolant(t_val, I_val, timescale * pybamm.t)
+
+current_function_py = PyObject(current_function_specific)
+param.update(PyDict(Dict("Current function [A]"=>current_interpolant)))
+
+model = pybamm.lithium_ion.DFN()
+simulation = pybamm.Simulation(model, parameter_values=param)
+t_max = t_val[end]
+
+simulation.solve(t_val,initial_soc=0)
+simulation.plot()
 
