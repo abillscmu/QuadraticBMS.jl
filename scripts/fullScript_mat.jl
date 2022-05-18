@@ -8,7 +8,7 @@ using DataFrames
 using CSV
 
 dt=1
-file = matopen("data/try3.mat")
+file = matopen("matlab_out.mat")
 Q_OCV = read(file,"QOCVfeasible")
 q_OCV = vec(read(file,"qOCVfeasible"))
 Q_COCV = read(file,"QPOCVfeasible")
@@ -28,7 +28,7 @@ h = 0.36    # Cooling Coefficient
 T_amb = 298    # Ambient Temperature
 cpm = 1587    # Thermal Capacity
 ic = [0.05,0,300]
-N=4000
+N=10
 τ_ohm = 1
 
 #Build Controller
