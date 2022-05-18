@@ -4,10 +4,9 @@ using JuMP
 import Ipopt
 using MosekTools
 using LinearAlgebra
-using PyCall
 import Dierckx
 
-pybamm = PyCall.pyimport("pybamm")
+#pybamm = PyCall.pyimport("pybamm")
 FARADAY = 96485.33212
 R = 8.314
 
