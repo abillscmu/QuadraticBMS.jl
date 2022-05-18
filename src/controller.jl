@@ -195,8 +195,8 @@ function buildControllerRungeKutta(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP
         #Restrict to 10C
         @constraint(model,I[i]<=0)
         @constraint(model,I[i]>=-20*oneC)
-        @constraint(model,DT[i]<=1)
-        @constraint(model,DT[i]>=0.1)
+        @constraint(model,DT[i]<=0.25)
+        @constraint(model,DT[i]>=0.025)
         fix(x[i,1],1)
         
     end

@@ -1,7 +1,7 @@
 #includes
 using QuadraticBMS
 using PyCall
-using MATLABPlots
+#using MATLABPlots
 using JuMP
 using MAT
 using DataFrames
@@ -36,11 +36,7 @@ controller_t = QuadraticBMS.buildController(ic,capacity,N,Q_OCV,q_OCV,Q_COCV,q_C
 
 optimize!(controller_t)
 
-I = value.(controller_t[:I])
-DT_val = value.(controller_t[:DT])
-T = value.(controller_t[:T])
-t_val = cumsum(DT_val)
-t_val = t_val.-t_val[1]
+
 
 
 
