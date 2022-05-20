@@ -10,6 +10,7 @@ Keyword arguments of max_T and pl_tol correspond to the constraints for maximum 
 
 """
 function buildController(ic,capacity,dt,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,c,τ_ohm;max_T=333,pl_tol=0)
+    #THIS IS REF-TRAJ
     #Construct IPOPT controller
     model = Model(Ipopt.Optimizer)
     #Build model matrices
@@ -72,7 +73,9 @@ function buildController(ic,capacity,dt,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,
 
 end
 
-function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,c,τ_ohm;max_T=333,pl_tol=0)
+
+#THIS IS DT
+function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,c,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.9)
     #Construct IPOPT controller
     model = Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "max_iter", 10000)
@@ -123,7 +126,7 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         #@constraint(model,e[i]==(z[i+1]-1)^2)
         #Restrict to 10C
         @constraint(model,I[i]<=0)
-        @constraint(model,I[i]>=-20*oneC)
+        @constraint(model,I[i]>=-10*oneC)
         @constraint(model,DT[i]<=1)
         @constraint(model,DT[i]>=0.1)
         fix(x[i,1],1)
@@ -136,7 +139,7 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         @constraint(model,e2[i-1]==(I[i]-I[i-1])^2)
     end
     #Objective Function
-    @constraint(model,z[end]>=0.9)
+    @constraint(model,z[end]>=top_SOC)
     @NLobjective(model,Min,sum(DT[i] for i in 1:N)/1000+sum(e2[i] for i in 1:N-1)/10000)
 
     return model
