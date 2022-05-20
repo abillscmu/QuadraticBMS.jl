@@ -30,10 +30,12 @@ function buildController(ic,capacity,dt,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,
     @variable(model,e2[i=1:N-1])
     T_amb = 300;
     t_vec = collect(range(0,step=dt,length=N))
+    oneC = capacity/3600
     #Initial conditions
     fix(z[1],ic[1])
     fix(OOP[1],ic[2])
     fix(T[1],ic[3])
+    
 
     #Establish model constraints
     for i=1:N
@@ -56,9 +58,9 @@ function buildController(ic,capacity,dt,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,
         @constraint(model,ipl[i]>=pl_tol)
         @constraint(model,T[i+1]<=max_T)
         @constraint(model,e[i]==(z[i+1]-1)^2)
-        #Restrict to 10 Amps
-        @constraint(model,I[i]<=30)
-        @constraint(model,I[i]>=-30)
+        #Restrict to 10C
+        @constraint(model,I[i]<=10*oneC)
+        @constraint(model,I[i]>=-10*oneC)
         @constraint(model,z[i]<=1)
         fix(x[i,1],1)
         
