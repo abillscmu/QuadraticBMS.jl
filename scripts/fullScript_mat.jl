@@ -6,7 +6,7 @@ using CSV
 using JuMP
 
 dt=1
-file = matopen("matlab_out.mat")
+file = matopen("../matlab_out.mat")
 Q_OCV = read(file,"QOCVfeasible")
 q_OCV = vec(read(file,"qOCVfeasible"))
 Q_COCV = read(file,"QPOCVfeasible")
@@ -29,14 +29,25 @@ ic = [0.05,0,300]
 N=1000
 τ_ohm = 1
 
+N_reftraj = 10
+dt_reftraj=1.0
+
 #Build Controller
 controller_t = QuadraticBMS.buildController(ic,capacity,N,Q_OCV,q_OCV,Q_COCV,q_COCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,cpm,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.2)
 
-optimize!(controller_t)
+controller_reftraj = QuadraticBMS.buildController(ic,capacity,dt_reftraj,N_reftraj,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,cpm,τ_ohm)
 
 
-function controller_dt()
-    return 
+function eval_controller_t()
+    optimize!(controller_t)
+    return value.(controller_t[:I])
+end
+
+function eval_controller_reftraj(new_ic)
+    QuadraticBMS.reinitialize!(controller_reftraj,new_ic)
+    optimize!(controller_reftraj)
+    return value.(controller_refraj[:I])
+end
 
 
 #df = DataFrame("# time [s]"=>t_val,"current [A]"=>I)

@@ -217,3 +217,12 @@ function buildControllerRungeKutta(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP
 
 end
 
+function reinitialize!(model,new_ic)
+    z = model[:z]
+    OOP = model[:OOP]
+    T = model[:T]
+    fix(z[1],new_ic[1])
+    fix(OOP[1],new_ic[2])
+    fix(T[1],new_ic[3])
+    return model
+end
