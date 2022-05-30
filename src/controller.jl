@@ -93,7 +93,7 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
     @variable(model,ipl[i=1:N])
     @variable(model,T[i=1:N+1])
     @variable(model,z[i=1:N+1])
-    @variable(model,DT[i=1:N])
+    @variable(model,DT)
     @variable(model,DOOP[i=1:N])
     #@variable(model,e[i=1:N])
     @variable(model,e2[i=1:N-1])
@@ -115,10 +115,10 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         @constraint(model,POP[i]==x[i,:]'*Q_POP*x[i,:]+q_POP'*x[i,:])
         @constraint(model,ipl[i]==POCV[i]-OCV[i]+NOP[i])
         #Differential Constraints
-        @NLconstraint(model,(OOP[i+1]-OOP[i])==DOOP[i]*DT[i])
+        @NLconstraint(model,(OOP[i+1]-OOP[i])==DOOP[i]*DT)
         @constraint(model,DOOP[i]==(-OOP[i]+x[i,:]'*Q_OOP*x[i,:]+q_OOP'*x[i,:])/τ_ohm)
-        @NLconstraint(model,(z[i+1]-z[i])==(-I[i]/capacity)*DT[i])
-        @NLconstraint(model,(T[i+1]-T[i])==(-h*(T[i]-T_amb)-I[i]*(V[i]-OCV[i]))*DT[i]/(c))
+        @NLconstraint(model,(z[i+1]-z[i])==(-I[i]/capacity)*DT)
+        @NLconstraint(model,(T[i+1]-T[i])==(-h*(T[i]-T_amb)-I[i]*(V[i]-OCV[i]))*DT/(c))
         #Trivial Constraints (definitions)
         @constraint(model,x[i,3]==I[i])
         @constraint(model,x[i,2]==z[i])
@@ -128,12 +128,9 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         #@constraint(model,e[i]==(z[i+1]-1)^2)
         #Restrict to 10C
         @constraint(model,I[i]<=0)
-        @constraint(model,I[i]>=-10*oneC)
-        @constraint(model,DT[i]<=1)
-        @constraint(model,DT[i]>=0.1)
-        if i!=N
-        @constraint(model,DT[i+1]==DT[i])
-        end
+        @constraint(model,I[i]>=-8*oneC)
+        @constraint(model,DT<=1)
+        @constraint(model,DT>=0.025)
         fix(x[i,1],1)
         
     end
@@ -145,7 +142,7 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
     end
     #Objective Function
     @constraint(model,z[end]>=top_SOC)
-    @NLobjective(model,Min,sum(DT[i] for i in 1:N)/1000+sum(e2[i] for i in 1:N-1)/10000)
+    @NLobjective(model,Min,sum(DT for i in 1:N)/1000)
 
     return model
 
