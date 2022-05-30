@@ -120,7 +120,6 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         @NLconstraint(model,(z[i+1]-z[i])==(-I[i]/capacity)*DT[i])
         @NLconstraint(model,(T[i+1]-T[i])==(-h*(T[i]-T_amb)-I[i]*(V[i]-OCV[i]))*DT[i]/(c))
         #Trivial Constraints (definitions)
-        @constraint(model,DT[i+1]==DT[i])
         @constraint(model,x[i,3]==I[i])
         @constraint(model,x[i,2]==z[i])
         ##CONSTRAINTS ON OPERATION
@@ -132,6 +131,9 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         @constraint(model,I[i]>=-10*oneC)
         @constraint(model,DT[i]<=1)
         @constraint(model,DT[i]>=0.1)
+        if i!=N
+        @constraint(model,DT[i+1]==DT[i])
+        end
         fix(x[i,1],1)
         
     end
