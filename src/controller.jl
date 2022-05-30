@@ -69,7 +69,7 @@ function buildController(ic,capacity,dt,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,
         @constraint(model,e2[i-1]==I[i]-I[i-1])
     end
     #Objective Function
-    @objective(model,Min,sum(e)+0.01*e2'*e2)
+    @objective(model,Min,sum(e)+0.000000000000001*e2'*e2)
 
     return model
 
@@ -80,7 +80,7 @@ end
 function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,c,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.9)
     #Construct IPOPT controller
     model = Model(Ipopt.Optimizer)
-    set_optimizer_attribute(model, "max_iter", 10000)
+    set_optimizer_attribute(model, "max_iter", 1000000)
     #Build model matrices
     @variable(model,x[i=1:N,j=1:3])
     @variable(model,V[i=1:N])
@@ -120,10 +120,11 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
         @NLconstraint(model,(z[i+1]-z[i])==(-I[i]/capacity)*DT[i])
         @NLconstraint(model,(T[i+1]-T[i])==(-h*(T[i]-T_amb)-I[i]*(V[i]-OCV[i]))*DT[i]/(c))
         #Trivial Constraints (definitions)
+        @constraint(model,DT[i+1]==DT[i])
         @constraint(model,x[i,3]==I[i])
         @constraint(model,x[i,2]==z[i])
         ##CONSTRAINTS ON OPERATION
-        #@constraint(model,ipl[i]>=pl_tol)
+        @constraint(model,ipl[i]>=pl_tol)
         @constraint(model,T[i+1]<=max_T)
         #@constraint(model,e[i]==(z[i+1]-1)^2)
         #Restrict to 10C
