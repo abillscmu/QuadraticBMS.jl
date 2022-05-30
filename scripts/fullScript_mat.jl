@@ -34,8 +34,11 @@ N=4000
 N_reftraj = 10
 dt_reftraj=1.0
 
+chatter_weight = 
+time_weight = 
+
 #Build Controller
-controller_t = QuadraticBMS.buildController(ic,capacity,N,Q_OCV,q_OCV,Q_COCV,q_COCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,cpm,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.99)
+controller_t = QuadraticBMS.buildController(ic,capacity,N,Q_OCV,q_OCV,Q_COCV,q_COCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,cpm,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.99,chatter_weight=chatter_weight,time_weight=time_weight)
 
 controller_reftraj = QuadraticBMS.buildController(ic,capacity,dt_reftraj,N_reftraj,Q_OCV,q_OCV,Q_COCV,q_COCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,cpm,τ_ohm)
 set_silent(controller_reftraj)

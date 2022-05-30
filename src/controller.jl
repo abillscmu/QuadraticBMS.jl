@@ -77,7 +77,7 @@ end
 
 
 #THIS IS DT
-function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,c,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.9)
+function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_POP,q_POP,Q_OOP,q_OOP,h,c,τ_ohm;max_T=333,pl_tol=0,top_SOC=0.9,chatter_weight=1,time_weight=1)
     #Construct IPOPT controller
     model = Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "max_iter", 1000000)
@@ -142,7 +142,7 @@ function buildController(ic,capacity,N,Q_OCV,q_OCV,Q_POCV,q_POCV,Q_NOP,q_NOP,Q_P
     end
     #Objective Function
     @constraint(model,z[end]>=top_SOC)
-    @NLobjective(model,Min,sum(DT for i in 1:N)/1000)
+    @NLobjective(model,Min,sum(DT for i in 1:N)*time_weight+sum(e2[i] for i in 1:N-1)*chatter_weight)
 
     return model
 
